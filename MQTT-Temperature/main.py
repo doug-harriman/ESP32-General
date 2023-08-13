@@ -1,20 +1,30 @@
 # main.py 
+print('main.py')
+
 import machine
 import network
 import time
 import ubinascii
 from umqtt.simple import MQTTClient
 from sensor_temperature import SensorTemperature
+from secret import WIFI_SSID, WIFI_PASS
+
 
 # Configuration
-DEVICE = "home-office-temp"
+# NOTE: There's a bug in nework.hostname where it will not accept a variable
+DEVICE = "home-office-tmp"
 MQTT_HOST = "192.168.0.120"
 MQTT_PORT = 1885
+SLEEP = 60*5  # [sec], time between temperature readings
 
 # Create network object.
-network.hostname(DEVICE)
+print('Configuring network interface')
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
+time.sleep(1)
+if len(DEVICE) > 15:
+    raise ValueError("Device name must be 15 characters or less.")
+wlan.config(hostname=DEVICE)
 
 # Look for WiFi network.
 nets = wlan.scan()
@@ -27,8 +37,8 @@ else:
 
 # Wait for connection
 retries = 5
-time.sleep(3)
 wlan.connect(WIFI_SSID, WIFI_PASS)
+time.sleep(3)
 while not wlan.isconnected() and retries > 0:
     print(f'Unable to connect to WiFi {WIFI_SSID}, retry ({retries})')
     retries -= 1
@@ -51,7 +61,8 @@ mqtt = MQTTClient(MQTT_CLIENT_ID,
 mqtt.connect()
 
 # MQTT Topic
-topic = bytes(f"device/{DEVICE}", "utf-8")
+topic = bytes(f"device/{network.hostname()}", "utf-8")
+print(f"MQTT topic: {topic}")
 
 # Connect to temperature sensor.
 sensor=SensorTemperature()
@@ -77,6 +88,7 @@ while True:
     mqtt.publish(topic,msg)
 
     # Sleep.
-    time.sleep(60*15)
+    print(f'Sleeping for {SLEEP} sec')
+    time.sleep(SLEEP)
 
 
