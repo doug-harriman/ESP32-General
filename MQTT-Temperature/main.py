@@ -12,6 +12,7 @@ MQTT_HOST = "192.168.0.120"
 MQTT_PORT = 1885
 
 # Create network object.
+network.hostname(DEVICE)
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 
