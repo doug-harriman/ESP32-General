@@ -7,7 +7,7 @@ from umqtt.simple import MQTTClient
 from sensor_temperature import SensorTemperature
 
 # Configuration
-DEVICE = "Home-Office-Temp"
+DEVICE = "home-office-temp"
 MQTT_HOST = "192.168.0.120"
 MQTT_PORT = 1885
 
